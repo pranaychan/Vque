@@ -118,3 +118,149 @@ body {
 .get-started:hover {
   background-color: #e69500;
 }
+
+/* NAVBAR LINKS */
+
+.nav-logo {
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.nav-buttons a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-buttons a {
+  height: 44px;
+  padding: 0 25px;
+  border-radius: 7px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* LOGIN BUTTON */
+
+.login-button {
+  background-color: white;
+  color: orange;
+}
+
+/* SIGNUP BUTTON */
+
+.signup-button {
+  background-color: #f2f2f2;
+  color: #222;
+}
+
+
+/* AUTHENTICATION PAGES */
+
+.auth-page {
+  min-height: 100vh;
+  background-color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+
+  padding: 40px;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  background-color: white;
+}
+
+.auth-card h1 {
+  text-align: center;
+  font-size: 32px;
+  color: orange;
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  margin-bottom: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input {
+  height: 45px;
+
+  padding: 0 12px;
+
+  border: 1px solid #ccc;
+  border-radius: 6px;
+
+  font-size: 15px;
+
+  outline: none;
+}
+
+.form-group input:focus {
+  border-color: orange;
+}
+
+.auth-button {
+  width: 100%;
+  height: 45px;
+
+  margin-top: 8px;
+
+  border: none;
+  border-radius: 6px;
+
+  background-color: orange;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.auth-button:hover {
+  background-color: #e69500;
+}
+
+.auth-footer {
+  margin-top: 25px;
+
+  text-align: center;
+
+  font-size: 14px;
+  color: #666;
+}
+
+.auth-footer a {
+  color: orange;
+  font-weight: 600;
+  text-decoration: none;
+}

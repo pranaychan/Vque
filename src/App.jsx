@@ -1,9 +1,13 @@
-import './App.css';
-import Navbar from "./components/Navbar";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./App.css";
 
-function App() {
+import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+
+function Home() {
   return (
-    <div className="app">
+    <>
       <Navbar />
 
       <main className="hero">
@@ -17,9 +21,23 @@ function App() {
           and get notified when it is your turn.
         </p>
 
-        <button className="get-started">Get Started</button>
+        <button className="get-started">
+          Get Started
+        </button>
       </main>
-    </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
