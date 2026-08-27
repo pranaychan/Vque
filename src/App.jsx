@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import "./App.css";
 
 import Navbar from "./components/Navbar";
@@ -21,9 +21,9 @@ function Home() {
           and get notified when it is your turn.
         </p>
 
-        <button className="get-started">
+        <Link to="/signup" className="get-started">
           Get Started
-        </button>
+        </Link>
       </main>
     </>
   );
