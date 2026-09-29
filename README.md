@@ -1,6 +1,6 @@
 # Vque
 
-Vque is a virtual queue management system for restaurants. Restaurants can manage locations and queues, while customers join queues through a QR/link, verify their phone, and track their position.
+Vque is a virtual queue management system for restaurants. Restaurants can manage locations and queues, while customers join queues through a QR/link with only their name and group size and track their position.
 
 ## Stack
 
@@ -8,8 +8,8 @@ Vque is a virtual queue management system for restaurants. Restaurants can manag
 - FastAPI + SQLAlchemy + PostgreSQL
 - JWT authentication
 - Argon2 password hashing via pwdlib
-- SMTP email verification/password reset
-- Local development OTP adapter
+- SMTP email verification/password reset in development
+- Resend email delivery in production
 - WebSockets for restaurant queue updates
 - Docker Compose
 
@@ -17,7 +17,7 @@ Vque is a virtual queue management system for restaurants. Restaurants can manag
 
 1. Copy `.env.example` to `.env`.
 2. Replace `SECRET_KEY` and the PostgreSQL password with strong values.
-3. For local development, leave `EMAIL_DEV_MODE=true`. Email codes are logged by the backend and are never returned by the API.
+3. For local development, leave `APP_ENV=development`. Email codes are logged by the backend and are never returned by the API.
 4. Start the stack:
 
 ```bash
@@ -27,37 +27,39 @@ docker compose up --build
 5. Open `http://localhost:5175`.
 6. API docs: `http://localhost:8000/docs`.
 
-## SMTP
+## Email
 
-Set `EMAIL_DEV_MODE=false` and configure:
+Email delivery is selected automatically from `APP_ENV`:
+
+- `development`: SMTP using `SMTP_*` variables.
+- `production`: Resend using `RESEND_API_KEY` and `EMAIL_FROM`.
+
+Local development example:
 
 ```env
-SMTP_HOST=smtp.example.com
+APP_ENV=development
+SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=your-user
-SMTP_PASSWORD=your-password
-SMTP_FROM=verified-sender@example.com
+SMTP_USERNAME=your-gmail@gmail.com
+SMTP_PASSWORD=your-google-app-password
+SMTP_FROM=your-gmail@gmail.com
 SMTP_USE_SSL=false
 ```
 
-For providers using implicit TLS/SMTPS:
+Production example:
 
 ```env
-SMTP_PORT=465
-SMTP_USE_SSL=true
+APP_ENV=production
+RESEND_API_KEY=re_xxxxxxxxx
+EMAIL_FROM=onboarding@resend.dev
 ```
 
-The backend logs the actual SMTP exception server-side without exposing credentials or provider internals to the client. After changing environment variables, recreate the backend container:
+After changing environment variables, recreate the backend container:
 
 ```bash
 docker compose up -d --build --force-recreate backend
 ```
 
-Then inspect delivery failures with:
-
-```bash
-docker compose logs -f backend
-```
 
 ## Database
 
@@ -84,17 +86,14 @@ python -m pytest
 
 - `.env` is intentionally not committed. Only `.env.example` belongs in Git.
 - If secrets were ever committed previously, rotate them before deployment.
-- Restaurant access JWTs and customer verification/queue-session JWTs use explicit purposes.
+- Restaurant access JWTs and customer queue-session JWTs use explicit purposes.
 - Email verification has cooldown and attempt limits.
 - Password reset requests have a cooldown and generic responses to reduce account enumeration.
-- Customer OTPs are HMAC-hashed, expire after five minutes, have a resend cooldown, and have an attempt limit.
 - PostgreSQL is not exposed on the host; the backend reaches it over the Compose network.
 
-## Customer guest mode
+## Customer queue access
 
-Customers do not need to create an account or verify a phone number to join a queue. From a queue's public `/join/:queueId` page, they can choose **Continue as guest**, enter their name and group size, and receive a signed queue-session token stored locally on their device.
-
-Phone verification remains available for customers who want the verified flow. Guest entries intentionally do not store a phone number and are allowed to rejoin the same queue independently.
+Customers do not need to create an account, provide a phone number, or enter an OTP. Scanning a queue QR code opens `/join/:queueId`, where they enter their name and group size and immediately receive a signed queue-session token stored on that device.
 
 
 ## Restaurant demo mode

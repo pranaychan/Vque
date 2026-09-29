@@ -7,3 +7,4 @@ python-jose[cryptography]
 pwdlib[argon2]
 pydantic[email]
 qrcode[pil]
+resend

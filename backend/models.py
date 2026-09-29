@@ -34,6 +34,7 @@ class Location(Base):
     name = Column(String(100), nullable=False)
     address = Column(String(255), nullable=False)
     city = Column(String(100), nullable=False)
+    status = Column(String(20), default="open", nullable=False)
     created_at = Column(DateTime(timezone=True), default=utcnow)
 
 
@@ -63,15 +64,3 @@ class QueueEntry(Base):
         CheckConstraint("(is_guest = TRUE AND phone_number IS NULL) OR (is_guest = FALSE AND phone_number IS NOT NULL)", name="ck_queue_entries_guest_contact"),
     )
 
-
-class OTPVerification(Base):
-    __tablename__ = "otp_verifications"
-    id = Column(Integer, primary_key=True, index=True)
-    phone_number = Column(String(10), nullable=False, index=True)
-    code_hash = Column(String(255), nullable=False)
-    expires_at = Column(DateTime(timezone=True), nullable=False)
-    verified = Column(Boolean, default=False, nullable=False)
-    attempts = Column(Integer, default=0, nullable=False)
-    used_at = Column(DateTime(timezone=True), nullable=True)
-    invalidated_at = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), default=utcnow)

@@ -98,7 +98,9 @@ button { cursor: pointer; }
 .delete-button:hover { background: #ffeceb; }
 
 .location-avatar { width: 38px; height: 38px; flex: 0 0 auto; }
-.location-card div:nth-child(2) { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.location-card-main > div:nth-child(2) { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.location-actions { display: flex; align-items: center; gap: 6px; }
+.location-actions .secondary-button, .location-actions .delete-button { padding: 7px 9px; font-size: 11px; }
 .location-card span { color: #888; font-size: 12px; }
 .location-card > b { color: #999; }
 .queue-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; border-bottom: 1px solid #eee; }

@@ -46,10 +46,6 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def _is_dev_email() -> bool:
-    return os.getenv("EMAIL_DEV_MODE", "true").strip().lower() == "true"
-
-
 def _send_or_raise(to_email: str, subject: str, body: str) -> None:
     try:
         send_email(to_email, subject, body)
@@ -155,8 +151,6 @@ def signup(restaurant: RestaurantCreate, db: Session = Depends(get_db)):
         "Verify your Vque email",
         f"Your Vque email verification code is {code}. It expires in 10 minutes.",
     )
-    if _is_dev_email():
-        logger.warning("DEVELOPMENT ONLY email verification code for %s: %s", new_restaurant.email, code)
     return {
         "message": "Restaurant registered. Verify your email before logging in.",
         "restaurant_id": new_restaurant.id,
@@ -217,8 +211,6 @@ def resend_verification(request: ResendVerification, db: Session = Depends(get_d
         "Your new Vque verification code",
         f"Your Vque email verification code is {code}. It expires in 10 minutes.",
     )
-    if _is_dev_email():
-        logger.warning("DEVELOPMENT ONLY email verification code for %s: %s", restaurant.email, code)
     return {"message": "Verification code sent"}
 
 

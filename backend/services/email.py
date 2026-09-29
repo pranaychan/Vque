@@ -1,10 +1,15 @@
-"""SMTP email delivery for restaurant verification and password reset flows."""
+"""Transactional email delivery for Vque.
+
+Development uses the configured SMTP server. Production uses Resend's HTTP API.
+"""
 
 import logging
 import os
 import smtplib
 import ssl
 from email.message import EmailMessage
+
+import resend
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +22,7 @@ def _env_bool(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
 
-def send_email(to_email: str, subject: str, body: str) -> None:
-    """Send an email through configured SMTP, or log it in development mode."""
-    if _env_bool("EMAIL_DEV_MODE", True):
-        logger.warning("EMAIL_DEV_MODE=true; email to %s was not sent. Subject: %s", to_email, subject)
-        return
-
+def _send_smtp(to_email: str, subject: str, body: str) -> None:
     host = os.getenv("SMTP_HOST", "").strip()
     username = os.getenv("SMTP_USERNAME", "").strip()
     password = os.getenv("SMTP_PASSWORD", "")
@@ -62,3 +62,39 @@ def send_email(to_email: str, subject: str, body: str) -> None:
     except (OSError, smtplib.SMTPException) as exc:
         logger.exception("SMTP delivery failed for %s", to_email)
         raise EmailDeliveryError("SMTP delivery failed") from exc
+
+
+def _send_resend(to_email: str, subject: str, body: str) -> None:
+    api_key = os.getenv("RESEND_API_KEY", "").strip()
+    sender = os.getenv("EMAIL_FROM", "").strip()
+    if not api_key or not sender:
+        raise EmailDeliveryError("RESEND_API_KEY and EMAIL_FROM must be configured in production")
+
+    resend.api_key = api_key
+    html = (
+        body.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\n", "<br>")
+    )
+    try:
+        result = resend.Emails.send({
+            "from": sender,
+            "to": [to_email],
+            "subject": subject,
+            "html": html,
+        })
+        if not result:
+            raise EmailDeliveryError("Resend returned no response")
+    except Exception as exc:
+        logger.exception("Resend delivery failed for %s", to_email)
+        raise EmailDeliveryError("Resend delivery failed") from exc
+
+
+def send_email(to_email: str, subject: str, body: str) -> None:
+    """Use SMTP locally and Resend in production."""
+    environment = os.getenv("APP_ENV", "development").strip().lower()
+    if environment == "production":
+        _send_resend(to_email, subject, body)
+    else:
+        _send_smtp(to_email, subject, body)

@@ -24,13 +24,14 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5175}
       APP_ENV: ${APP_ENV:-development}
-      EMAIL_DEV_MODE: ${EMAIL_DEV_MODE:-true}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-}
       SMTP_USE_SSL: ${SMTP_USE_SSL:-false}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-onboarding@resend.dev}
       DEMO_MODE_ENABLED: ${DEMO_MODE_ENABLED:-true}
     ports:
       - "8000:8000"

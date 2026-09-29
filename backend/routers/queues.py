@@ -164,7 +164,8 @@ def get_public_queue(queue_id: int, db: Session = Depends(get_db)):
     return {
         "id": queue.id,
         "name": queue.name,
-        "status": queue.status,
+        "status": queue.status if location.status == "open" else "paused",
+        "location_status": location.status,
         "location_name": location.name,
         "city": location.city,
         "waiting_count": waiting_count,

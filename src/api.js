@@ -73,6 +73,14 @@ export async function getLocations() {
     return request("/locations/");
 }
 
+export async function getDashboardLocations() {
+    return request("/locations/dashboard");
+}
+
+export async function updateLocationStatus(locationId, status) {
+    return request(`/locations/${locationId}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+}
+
 export async function createLocation(location) {
     return request("/locations/", { method: "POST", body: JSON.stringify(location) });
 }
@@ -123,11 +131,3 @@ export async function leaveQueue(entryId, queueSessionToken) {
     return request(`/queue-entries/entry/${entryId}`, { method: "DELETE", authToken: queueSessionToken });
 }
 
-// Customer phone OTP
-export async function sendOtp(phoneNumber) {
-    return request("/otp/send", { method: "POST", body: JSON.stringify({ phone_number: phoneNumber }) });
-}
-
-export async function verifyOtp(phoneNumber, code) {
-    return request("/otp/verify", { method: "POST", body: JSON.stringify({ phone_number: phoneNumber, code }) });
-}

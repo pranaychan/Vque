@@ -5,10 +5,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 
 from database import Base, engine
 import models  # noqa: F401 - register all SQLAlchemy models
-from routers import auth, restaurants, locations, queues, queue_entries, otp
+from routers import auth, restaurants, locations, queues, queue_entries
 
 
 @asynccontextmanager
@@ -16,6 +17,12 @@ async def lifespan(app: FastAPI):
     # Development setup: create any missing tables from the SQLAlchemy models.
     # This does not drop or reset existing tables.
     Base.metadata.create_all(bind=engine)
+    # Lightweight compatibility migration for development/Render deployments
+    # without Alembic: add the location status column if an older DB exists.
+    columns = {column["name"] for column in inspect(engine).get_columns("locations")}
+    if "status" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE locations ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'open'"))
     yield
 
 
@@ -50,4 +57,3 @@ app.include_router(restaurants.router)
 app.include_router(locations.router)
 app.include_router(queues.router)
 app.include_router(queue_entries.router)
-app.include_router(otp.router)

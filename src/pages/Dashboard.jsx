@@ -6,10 +6,10 @@ import {
     deleteLocation,
     deleteQueue,
     getApiUrl,
-    getLocations,
+    getDashboardLocations,
     getManageQueueEntries,
-    getQueues,
     getRestaurant,
+    updateLocationStatus,
     updateQueueEntry,
     updateQueueStatus
 } from "../api";
@@ -48,25 +48,18 @@ function Dashboard() {
     async function loadDashboard() {
         try {
             setLoading(true);
-            const restaurantData = await getRestaurant();
-            const locationData = await getLocations();
-            const completeLocations = [];
-
-            for (const location of locationData) {
-                const queues = await getQueues(location.id);
-                const completeQueues = [];
-                for (const queue of queues) {
-                    const queueEntries = await getManageQueueEntries(queue.id);
-                    completeQueues.push({ ...queue, entriesCount: queueEntries.length });
-                    if (queue.id === selectedQueueId) setEntries(queueEntries);
-                }
-                completeLocations.push({ ...location, queues: completeQueues });
-            }
-
+            const [restaurantData, dashboardLocations] = await Promise.all([
+                getRestaurant(),
+                getDashboardLocations(),
+            ]);
             setRestaurant(restaurantData);
-            setLocations(completeLocations);
-            if (!selectedLocationId && completeLocations.length) setSelectedLocationId(completeLocations[0].id);
-            if (!selectedQueueId && completeLocations[0]?.queues.length) setSelectedQueueId(completeLocations[0].queues[0].id);
+            setLocations(dashboardLocations);
+            const nextLocationId = selectedLocationId || dashboardLocations[0]?.id || null;
+            const location = dashboardLocations.find((item) => item.id === nextLocationId) || dashboardLocations[0];
+            const nextQueueId = selectedQueueId || location?.queues[0]?.id || null;
+            setSelectedLocationId(nextLocationId);
+            setSelectedQueueId(nextQueueId);
+            if (nextQueueId) setEntries(await getManageQueueEntries(nextQueueId));
         } catch (err) {
             setError(err.message);
         } finally {
@@ -146,6 +139,19 @@ function Dashboard() {
             setLocationData({ name: "", address: "", city: "" });
             setLocationForm(false);
         } catch (err) {
+            setError(err.message);
+        }
+    }
+
+    async function changeLocationStatus(location) {
+        const nextStatus = location.status === "paused" ? "open" : "paused";
+        try {
+            setLocations((current) => current.map((item) => item.id === location.id ? { ...item, status: nextStatus } : item));
+            const updated = await updateLocationStatus(location.id, nextStatus);
+            setLocations((current) => current.map((item) => item.id === updated.id ? { ...item, status: updated.status } : item));
+            addEvent(`Location ${nextStatus}`);
+        } catch (err) {
+            setLocations((current) => current.map((item) => item.id === location.id ? { ...item, status: location.status } : item));
             setError(err.message);
         }
     }
@@ -347,14 +353,14 @@ function Dashboard() {
                                         <div><strong>{location.name}</strong><span>{location.city}</span></div>
                                         <b>{location.queues.length}</b>
                                     </button>
-                                    <button
-                                        className="delete-button"
-                                        onClick={() => handleDeleteLocation(location)}
-                                        title="Delete location"
-                                        aria-label={`Delete ${location.name}`}
-                                    >
-                                        Delete
-                                    </button>
+                                    <div className="location-actions">
+                                        <button className="secondary-button" onClick={() => changeLocationStatus(location)}>
+                                            {location.status === "paused" ? "Resume" : "Pause"}
+                                        </button>
+                                        <button className="delete-button" onClick={() => handleDeleteLocation(location)} title="Delete location" aria-label={`Delete ${location.name}`}>
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -372,7 +378,7 @@ function Dashboard() {
                                     <div>
                                         <p className="eyebrow">LOCATION</p>
                                         <h2>{selectedLocation.name}</h2>
-                                        <span className="muted">{selectedLocation.address}, {selectedLocation.city}</span>
+                                        <span className="muted">{selectedLocation.address}, {selectedLocation.city} · {selectedLocation.status}</span>
                                     </div>
                                     <button
                                         className="primary-button"
@@ -451,7 +457,7 @@ function Dashboard() {
                                                         <div className="customer-avatar">{entry.customer_name.charAt(0).toUpperCase()}</div>
                                                         <div>
                                                             <strong>{entry.customer_name}</strong>
-                                                            <span>{entry.phone_number}</span>
+                                                            <span>{entry.is_guest ? "Guest" : "Verified customer"}</span>
                                                         </div>
                                                     </div>
                                                     <span>{entry.group_size} {entry.group_size === 1 ? "person" : "people"}</span>

@@ -137,10 +137,7 @@ class QueueStatusUpdate(BaseModel):
 
 class QueueEntryCreate(BaseModel):
     customer_name: str = Field(min_length=2, max_length=100)
-    phone_number: str | None = Field(default=None, min_length=10, max_length=10)
     group_size: int = Field(ge=1, le=20)
-    verification_token: str | None = Field(default=None, min_length=10, max_length=500)
-    guest_mode: bool = False
 
     @field_validator("customer_name")
     @classmethod
@@ -150,37 +147,3 @@ class QueueEntryCreate(BaseModel):
             raise ValueError("Enter a valid customer name")
         return value
 
-    @field_validator("phone_number")
-    @classmethod
-    def clean_phone(cls, value):
-        if value is None:
-            return value
-        value = re.sub(r"[\s-]", "", value)
-        if not re.fullmatch(r"[0-9]{10}", value):
-            raise ValueError("Enter a valid 10-digit Indian mobile number")
-        if value[0] not in "6789":
-            raise ValueError("Enter a valid Indian mobile number")
-        return value
-
-
-class OTPRequest(BaseModel):
-    phone_number: str = Field(min_length=10, max_length=10)
-
-    @field_validator("phone_number")
-    @classmethod
-    def validate_phone(cls, value):
-        if not re.fullmatch(r"[6-9][0-9]{9}", value):
-            raise ValueError("Enter a valid 10-digit Indian mobile number")
-        return value
-
-
-class OTPVerify(BaseModel):
-    phone_number: str = Field(min_length=10, max_length=10)
-    code: str = Field(pattern=r"^[0-9]{6}$")
-
-    @field_validator("phone_number")
-    @classmethod
-    def validate_phone(cls, value):
-        if not re.fullmatch(r"[6-9][0-9]{9}", value):
-            raise ValueError("Enter a valid 10-digit Indian mobile number")
-        return value
