@@ -271,8 +271,7 @@ function Dashboard() {
             <aside className="sidebar">
                 <div className="sidebar-brand"><span>V</span> Vque</div>
                 <div className="sidebar-label">WORKSPACE</div>
-                <button className="sidebar-link active">Overview</button>
-                <button className="sidebar-link" onClick={() => setLocationForm(true)}>Locations</button>
+                <button className="sidebar-link active">Dashboard</button>
                 <div className="sidebar-spacer" />
                 <button className="sidebar-link" onClick={logout}>Sign out</button>
             </aside>
